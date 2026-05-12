@@ -94,7 +94,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./Hms Frontend
-        run: npm ci
+        run: npm install
 
       - name: Build Frontend
         working-directory: ./Hms Frontend
