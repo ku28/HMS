@@ -1,0 +1,246 @@
+﻿Name,Category,Description,Error Response,Http Method,Success Response
+/api/reservation/post,Reservation,Create a new reservation.,"{
+  ""code"": ADDFAILS"",
+  ""message"":reservation already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""Reservation added successfully""
+}"
+/api/reservation/update/{reservation_id},Reservation,Update reservation details.,"{
+  ""code"": UPDTFAILS"",
+  ""message"":Reservation doesn't  exist""
+}",PUT,"{
+  ""code"": ""UPDATESUCCESS"",
+  ""message"": ""Reservation updated successfully""
+}"
+/api/hotels/{hotel_id},Hotel,Get details of a specific hotel by ID.,"{
+  ""code"": GETFAILS"",
+  ""message"":Hotel doesn't exist exist""
+}",GET,{Object of hotel}
+/api/rooms/post,Room,Create a new room.,"{
+  ""code"": ADDFAILS"",
+  ""message"":Room already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": "" room added successfully""
+}"
+/api/room/all,Room,"Get all rooms ","{
+  ""code"": GETALLFAILS"",
+  ""message"":room list is empty""
+}",GET,{List of all rooms}
+/api/review/all,Review,Get a list of all reviews.,"{
+  ""code"": GETALLFAILS"",
+  ""message"":Review list is empty""
+}",GET,{List of object of Review}
+/api/reservation/{reservation_id},Reservation,Get reservation By Id,"{
+  ""code"":GETFAILS"",
+  ""message"":Reservation doesn't exist""
+}",GET,{Object of reservation}
+/api/room/update/{room_id},Room,Update room details.,"{
+  ""code"": UPDTFAILS"",
+  ""message"":Room doesn't exist exist""
+}",PUT,"{
+  ""code"": ""UPDATESUCCESS"",
+  ""message"": ""Room updated successfully""
+}"
+/api/review/update/{review_id},Review,Update review details.,"{
+  ""code"": UPDTFAILS"",
+  ""message"":Review doesn't exist exist""
+}",PUT,"{
+  ""code"": ""UPDATESUCCESS"",
+  ""message"": ""Review updated successfully""
+}"
+/api/reservation/{reservation_id},Reservation,Delete a reservation.,"{
+  ""code"": DLTFAILS"",
+  ""message"":Reservation doesn't exist exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""reservation deleted successfully""
+}"
+,Room,,,,
+/api/review/{review_id},Review,Get details of a specific review by ID.,"{
+  ""code"": GETFAILS"",
+  ""message"":Review doesn't exist""
+}",GET,{Object of Review}
+/api/hotels/post,Hotel,Create a new Hotel,"{
+  ""code"": ADDFAILS"",
+  ""message"":Hotel already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""Hoteladded successfully""
+}"
+/api/hotelamenity/post,HotelAmenity,Create a new hotelamenity.,"{
+  ""code"": ADDFAILS"",
+  ""message"":Hotelamenity already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""Hotelamenity added successfully""
+}"
+/api/review/delete/{review_id},Review,Delete an review.,"{
+  ""code"": DLTFAILS"",
+  ""message"":Review doesn't exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""Review deleted successfully""
+}"
+/api/RoomType/update/{RoomType_id},RoomType,Update RoomType details.,"{
+  ""code"": UPDTFAILS"",
+  ""message"":RoomType doesn't exist exist""
+}",PUT,"{
+  ""code"": ""UPDATESUCCESS"",
+  ""message"": ""RoomType updated successfully""
+}"
+/api/users/delete/{userId},Hotel,Delete a user,"{
+  ""code"": DLTFAILS"",
+  ""message"":User doesn't exist exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""User deleted successfully""
+}"
+/api/amenity/post,Amenity,Create a new amenity,"{
+  ""code"": ADDFAILS"",
+  ""message"":Amenity already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""Amenity added successfully""
+}"
+/api/amenity/all,Amenity,Get a list of all amenities.,"{
+  ""code"": GETALLFAILS"",
+  ""message"":Amenity list is empty""
+}",GET,{List of amenity}
+/api/payment/{payment_id},Payment,Delete a payment.,"{
+  ""code"": DLTFAILS"",
+  ""message"":Payment doesn't exist exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""Payment deleted successfully""
+}"
+/api/reservation/all,Reservation,Get a list of all reservation.,"{
+  ""code"": GETALLFAILS"",
+  ""message"":reservation list is empty""
+}",GET,{List of reservations}
+/api/review/post,Review,Upload a new review.,"{
+  ""code"": ADDFAILS"",
+  ""message"":Review already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""Review added successfully""
+}"
+/api/payment/all,Payment,Get a list of all payments.,"{
+  ""code"": GETALLFAILS"",
+  ""message"":Payment list is empty""
+}",GET,{List of payment}
+/api/hotels/all,Hotel,Get a list of all hotels,"{
+  ""code"": GETFAILS"",
+  ""message"":Hotel list is empty""
+}",GET,{list of all hotels}
+/api/hotels/update/{hotel_id},Hotel,Update hotel details.,"{
+  ""code"": UPDTFAILS"",
+  ""message"":Hotel doesn't exist exist""
+}",PUT,"{
+  ""code"": ""UPDATESUCCESS"",
+  ""message"": ""Hotel updated successfully""
+}"
+/api/projects/delete/{projectId},RoomType,Delete a project.,"{
+  ""code"": DLTFAILS"",
+  ""message"":Project doesn't exist exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""Proejct deleted successfully""
+}"
+/api/rooms/available/{roomTypeId},Room,Retrieve a list of available rooms of a specific type,"{
+  ""code"": GETALLFAILS"",
+  ""message"": No room found with given type
+}",GET,{List of rooms}
+/api/payment/{payment_id},Payment,Get payment By Id,"{
+  ""code"":GETFAILS"",
+  ""message"":Payment doesn't exist""
+}",GET,{Object of payment}
+,Reservation,,,,
+/api/roomAmenity/post,RoomAmenity,Create a new roomamenity,"{
+  ""code"": ADDFAILS"",
+  ""message"":RoomAmenity already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""RoomAmenity added successfully""
+}"
+/api/amenity/{amenity_id},Amenity,Get amenity By Id,"{
+  ""code"":GETFAILS"",
+  ""message"":Amanity doesn't exist""
+}",GET,{Object of amanity}
+/api/tasks/{taskId},Room,Delete a task.,"{
+  ""code"": DLTFAILS"",
+  ""message"":Task doesn't exist exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""task deleted successfully""
+}"
+/api/RoomType/post,RoomType,Create a new roomType,"{
+  ""code"": ADDFAILS"",
+  ""message"":RoomType already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""roomType added successfully""
+}"
+/api/payment/post,Payment,Create a new payment,"{
+  ""code"": ADDFAILS"",
+  ""message"":Payment already exist""
+}",POST,"{
+  ""code"": ""POSTSUCCESS"",
+  ""message"": ""Payment added successfully""
+}"
+,Review,,,,
+/api/RoomType/{RoomType_id},RoomType,Get a Room Type by Id,"{
+  ""code"": GETFAILS"",
+  ""message"":RoomType doesn't exist ""
+}",GET,{Get a RoomType Object}
+/api/room/{room_id},Room,"Get all a room ","{
+  ""code"": GETALLFAILS"",
+  ""message"":room doesn't exist""
+}",GET,{get a room object}
+/api/amenity/update/{amenity_id},Amenity,Update amenity details.,"{
+  ""code"": UPDTFAILS"",
+  ""message"":Amenity doesn't  exist""
+}",PUT,"{
+  ""code"": ""UPDATESUCCESS"",
+  ""message"": ""Amenity updated successfully""
+}"
+/api/amenity/{amenity_id},Amenity,Delete a amenity.,"{
+  ""code"": DLTFAILS"",
+  ""message"":Amenity doesn't exist exist""
+}",DELETE,"{
+  ""code"": ""DELETESUCCESS"",
+  ""message"": ""Amanity deleted successfully""
+}"
+/api/rooms/location/{location},Room,Retrieve rooms based on their location.,,GET,{List of rooms}
+/api/rooms/amenities/{amenityId},Room,Retrieve rooms that have a specific amenity.,,GET,{List of rooms}
+/api/reservations/date-range?startDate={startDate}&endDate={endDate},Reservation,Retrieve reservations within a specified date range.,,GET,{List of Object of reservation}
+/api/reviews/rating/{rating},Review,Retrieve reviews with a specific rating.,"{
+  ""code"": GETALLFAILS"",
+  ""message"":Review list is empty""
+}",GET,{List of Reviews}
+/api/reviews/recent,Review,Retrieve the most recent reviews.,"{
+  ""code"": GETFAILS"",
+  ""message"":Review doesn't exist""
+}",GET,{Object  of Reviews}
+/api/payments/status/{status},Payment,"Retrieve payments based on their status (e.g., ""Paid,"" ""Pending"").","{
+  ""code"": GETALLFAILS"",
+  ""message"":Payment list is empty""
+}",GET,{List of payment}
+/api/payments/total-revenue,Payment,Retrieve the total revenue generated through payments.,,GET,{Amount of revenew}
+/api/hotels/{amenity_id},Hotel,Get List of hotel which provide spacific amenity,"{
+  ""code"": GETFAILS"",
+  ""message"":No hotel is found with the spacific amenity""
+}",GET,{List of hotel}
+/api/amenity/{hotel_id},Amenity,Get all amenities which is provided by a specific hotel,"{
+  ""code"": GETALLFAILS"",
+  ""message"":hotel not found with given hotel id""
+}",GET,{List of amenity}
+/api/amenity/{room_id},Amenity,Get all amenities which is provided by a room,"{
+  ""code"": GETALLFAILS"",
+  ""message"":room not found with given hotel id""
+}",GET,{List of amenity}
+/api/rooms/{amenity_id},Room,Get all rooms which  provides a specific amenity,"{
+  ""code"": GETALLFAILS"",
+  ""message"": amenity does't exist with given id""
+}",GET,{List of rooms}
