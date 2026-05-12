@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Default admin user (password: admin123 - BCrypt encoded)
 INSERT INTO users (email, password, full_name, phone, role) VALUES
-('admin@hms.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'System Admin', '0000000000', 'ROLE_ADMIN');
+('admin@hms.com', '$2a$12$uilSXHzxoHN7p6PjmG1QpucCfrXkRZu9QtfROepEwz49WyWjtg4yS', 'System Admin', '0000000000', 'ROLE_ADMIN');
