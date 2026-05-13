@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(RoomController.class)
 @Import({TestSecurityConfig.class, GlobalExceptionHandler.class})
+@ActiveProfiles("test")
 @DisplayName("RoomController Integration Tests")
 class RoomControllerTest {
 
@@ -66,7 +68,7 @@ class RoomControllerTest {
     @Test @DisplayName("shouldCreateRoomAndReturnCreated")
     void shouldCreateRoomAndReturnCreated() throws Exception {
         RoomRequestDto dto = RoomRequestDto.builder().roomNumber(102)
-                .roomTypeId(1).isAvailable(true).build();
+                .hotelId(1).roomTypeId(1).isAvailable(true).build();
         when(roomService.createRoom(any())).thenReturn(buildResponseDto());
 
         mockMvc.perform(post("/api/rooms/post")

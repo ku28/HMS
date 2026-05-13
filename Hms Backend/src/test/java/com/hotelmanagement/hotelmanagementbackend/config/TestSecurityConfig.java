@@ -1,6 +1,5 @@
 package com.hotelmanagement.hotelmanagementbackend.config;
 
-import com.hotelmanagement.hotelmanagementbackend.security.JwtAuthenticationFilter;
 import com.hotelmanagement.hotelmanagementbackend.security.JwtTokenProvider;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -54,11 +53,6 @@ public class TestSecurityConfig {
     @Bean
     public JwtTokenProvider testJwtTokenProvider() {
         return Mockito.mock(JwtTokenProvider.class);
-    }
-
-    @Bean
-    public JwtAuthenticationFilter testJwtAuthenticationFilter() {
-        return Mockito.mock(JwtAuthenticationFilter.class);
     }
 
     @Bean
