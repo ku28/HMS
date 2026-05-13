@@ -48,6 +48,8 @@ public class RoomMapper {
         return RoomResponseDto.builder()
                 .roomId(room.getRoomId())
                 .roomNumber(room.getRoomNumber())
+                .hotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null)
+                .hotelName(room.getHotel() != null ? room.getHotel().getName() : null)
                 .roomType(room.getRoomType() != null ? toRoomTypeResponseDto(room.getRoomType()) : null)
                 .isAvailable(room.getIsAvailable())
                 .amenities(room.getAmenities() != null
@@ -67,6 +69,8 @@ public class RoomMapper {
         return RoomResponseDto.builder()
                 .roomId(room.getRoomId())
                 .roomNumber(room.getRoomNumber())
+                .hotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null)
+                .hotelName(room.getHotel() != null ? room.getHotel().getName() : null)
                 .roomType(room.getRoomType() != null ? toRoomTypeResponseDto(room.getRoomType()) : null)
                 .isAvailable(room.getIsAvailable())
                 .amenities(Collections.emptyList())

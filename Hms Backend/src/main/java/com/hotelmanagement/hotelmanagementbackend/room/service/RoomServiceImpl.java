@@ -5,7 +5,9 @@ import com.hotelmanagement.hotelmanagementbackend.common.PagedResponseMapper;
 import com.hotelmanagement.hotelmanagementbackend.exception.ResourceAlreadyExistsException;
 import com.hotelmanagement.hotelmanagementbackend.exception.ResourceNotFoundException;
 import com.hotelmanagement.hotelmanagementbackend.hotel.entity.Amenity;
+import com.hotelmanagement.hotelmanagementbackend.hotel.entity.Hotel;
 import com.hotelmanagement.hotelmanagementbackend.hotel.repository.AmenityRepository;
+import com.hotelmanagement.hotelmanagementbackend.hotel.repository.HotelRepository;
 import com.hotelmanagement.hotelmanagementbackend.mapper.RoomMapper;
 import com.hotelmanagement.hotelmanagementbackend.room.dto.*;
 import com.hotelmanagement.hotelmanagementbackend.room.entity.Room;
@@ -29,15 +31,18 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final AmenityRepository amenityRepository;
+    private final HotelRepository hotelRepository;
     private final RoomMapper roomMapper;
 
     public RoomServiceImpl(RoomRepository roomRepository,
                            RoomTypeRepository roomTypeRepository,
                            AmenityRepository amenityRepository,
+                           HotelRepository hotelRepository,
                            RoomMapper roomMapper) {
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.amenityRepository = amenityRepository;
+        this.hotelRepository = hotelRepository;
         this.roomMapper = roomMapper;
     }
 
@@ -49,8 +54,11 @@ public class RoomServiceImpl implements RoomService {
         }
         RoomType roomType = roomTypeRepository.findById(dto.getRoomTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("RoomType", "roomTypeId", dto.getRoomTypeId()));
+        Hotel hotel = hotelRepository.findById(dto.getHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel", "hotelId", dto.getHotelId()));
         Room room = roomMapper.toRoomEntity(dto);
         room.setRoomType(roomType);
+        room.setHotel(hotel);
         Room saved = roomRepository.save(room);
         return roomMapper.toRoomResponseDtoWithoutAmenities(saved);
     }
@@ -67,9 +75,9 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<RoomResponseDto> getAllRooms(Pageable pageable) {
-        Page<Room> page = roomRepository.findByIsAvailableTrue(pageable);
+        Page<Room> page = roomRepository.findAll(pageable);
         List<RoomResponseDto> dtos = page.getContent().stream()
-                .map(roomMapper::toRoomResponseDtoWithoutAmenities)
+                .map(roomMapper::toRoomResponseDto)
                 .collect(Collectors.toList());
         return PagedResponseMapper.toPagedResponse(page, dtos);
     }
@@ -133,5 +141,15 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Amenity", "amenityId", dto.getAmenityId()));
         room.getAmenities().add(amenity);
         roomRepository.save(room);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<RoomResponseDto> getRoomsByHotel(Integer hotelId, Pageable pageable) {
+        Page<Room> page = roomRepository.findByHotel_HotelId(hotelId, pageable);
+        List<RoomResponseDto> dtos = page.getContent().stream()
+                .map(roomMapper::toRoomResponseDto)
+                .collect(Collectors.toList());
+        return PagedResponseMapper.toPagedResponse(page, dtos);
     }
 }

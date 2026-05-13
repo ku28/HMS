@@ -17,6 +17,8 @@ public class RoomResponseDto implements Serializable {
 
     private Integer roomId;
     private Integer roomNumber;
+    private Integer hotelId;
+    private String hotelName;
     private RoomTypeResponseDto roomType;
     private Boolean isAvailable;
     private List<AmenityResponseDto> amenities;

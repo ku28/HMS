@@ -60,6 +60,21 @@ public class ReservationController {
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Reservations retrieved", response));
     }
 
+    @GetMapping("/my")
+    @Operation(summary = "Get reservations by guest email")
+    public ResponseEntity<ApiResponse<PagedResponse<ReservationResponseDto>>> getMyReservations(
+            @RequestParam String email,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "reservationId") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponse<ReservationResponseDto> response = reservationService.getReservationsByEmail(email, pageable);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Reservations retrieved", response));
+    }
+
     @GetMapping("/date-range")
     @Operation(summary = "Get reservations by date range")
     public ResponseEntity<ApiResponse<PagedResponse<ReservationResponseDto>>> getByDateRange(

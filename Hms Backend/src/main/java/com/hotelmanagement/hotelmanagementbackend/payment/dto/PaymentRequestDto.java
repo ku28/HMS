@@ -30,4 +30,7 @@ public class PaymentRequestDto {
     @NotNull(message = "Payment status is required")
     @Size(max = 50, message = "Payment status must be less than 50 characters")
     private String paymentStatus;
+
+    @Size(max = 50, message = "Payment method must be less than 50 characters")
+    private String paymentMethod;
 }

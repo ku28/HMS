@@ -21,4 +21,6 @@ public interface RoomService {
     void deleteRoom(Integer roomId);
 
     void addAmenityToRoom(RoomAmenityRequestDto dto);
+
+    PagedResponse<RoomResponseDto> getRoomsByHotel(Integer hotelId, Pageable pageable);
 }

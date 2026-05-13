@@ -20,4 +20,5 @@ public class PaymentResponseDto implements Serializable {
     private BigDecimal amount;
     private LocalDate paymentDate;
     private String paymentStatus;
+    private String paymentMethod;
 }

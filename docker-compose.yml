@@ -52,10 +52,11 @@ services:
       - ./db/create_hotel.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./db/create_users.sql:/docker-entrypoint-initdb.d/02-users.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     networks:
       - hms-network
     restart: unless-stopped

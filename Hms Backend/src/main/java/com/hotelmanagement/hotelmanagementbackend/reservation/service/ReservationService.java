@@ -21,5 +21,7 @@ public interface ReservationService {
 
     void deleteReservation(Integer reservationId);
 
+    PagedResponse<ReservationResponseDto> getReservationsByEmail(String email, Pageable pageable);
+
     long getTotalReservations();
 }

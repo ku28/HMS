@@ -17,6 +17,9 @@ public class RoomRequestDto {
     @Positive(message = "Room number must be positive")
     private Integer roomNumber;
 
+    @NotNull(message = "Hotel ID is required")
+    private Integer hotelId;
+
     @NotNull(message = "Room type ID is required")
     private Integer roomTypeId;
 

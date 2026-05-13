@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class AmenityController {
 
     private final AmenityService amenityService;
+    @SuppressWarnings("unused")
     private final HotelService hotelService;
 
     public AmenityController(AmenityService amenityService, HotelService hotelService) {

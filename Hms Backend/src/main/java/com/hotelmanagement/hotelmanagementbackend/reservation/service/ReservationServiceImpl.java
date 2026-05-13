@@ -72,10 +72,17 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ReservationResponseDto> getAllReservations(Pageable pageable) {
-        Page<Reservation> page = reservationRepository.findByGuestEmailIgnoreCase("", pageable);
-        // Use a broader search to get all
-        page = reservationRepository.findByCheckInDateGreaterThanEqualAndCheckOutDateLessThanEqual(
-                LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31), pageable);
+        Page<Reservation> page = reservationRepository.findAll(pageable);
+        List<ReservationResponseDto> dtos = page.getContent().stream()
+                .map(reservationMapper::toResponseDto)
+                .collect(Collectors.toList());
+        return PagedResponseMapper.toPagedResponse(page, dtos);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<ReservationResponseDto> getReservationsByEmail(String email, Pageable pageable) {
+        Page<Reservation> page = reservationRepository.findByGuestEmailIgnoreCase(email, pageable);
         List<ReservationResponseDto> dtos = page.getContent().stream()
                 .map(reservationMapper::toResponseDto)
                 .collect(Collectors.toList());

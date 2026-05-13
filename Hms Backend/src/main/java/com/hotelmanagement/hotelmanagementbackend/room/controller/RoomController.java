@@ -63,6 +63,17 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Available rooms retrieved", response));
     }
 
+    @GetMapping("/api/room/hotel/{hotel_id}")
+    @Operation(summary = "Get rooms by hotel")
+    public ResponseEntity<ApiResponse<PagedResponse<RoomResponseDto>>> getRoomsByHotel(
+            @PathVariable("hotel_id") Integer hotelId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        PagedResponse<RoomResponseDto> response = roomService.getRoomsByHotel(hotelId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Rooms retrieved", response));
+    }
+
     @GetMapping("/api/rooms/{amenity_id}")
     @Operation(summary = "Get rooms by amenity")
     public ResponseEntity<ApiResponse<PagedResponse<RoomResponseDto>>> getRoomsByAmenity(

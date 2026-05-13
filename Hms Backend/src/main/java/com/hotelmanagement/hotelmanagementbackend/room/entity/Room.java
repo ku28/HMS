@@ -39,6 +39,10 @@ public class Room {
     private Integer roomNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id")
+    private com.hotelmanagement.hotelmanagementbackend.hotel.entity.Hotel hotel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_type_id")
     private RoomType roomType;
 

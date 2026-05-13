@@ -9,6 +9,11 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ReservationsPage from './pages/ReservationsPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminHotels from './pages/AdminHotels';
+import AdminRooms from './pages/AdminRooms';
+import AdminBooking from './pages/AdminBooking';
+import AdminReservations from './pages/AdminReservations';
+import AdminReviews from './pages/AdminReviews';
 import './index.css';
 
 export default function App() {
@@ -26,6 +31,11 @@ export default function App() {
         </Route>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="hotels" element={<AdminHotels />} />
+          <Route path="rooms" element={<AdminRooms />} />
+          <Route path="booking" element={<AdminBooking />} />
+          <Route path="reservations" element={<AdminReservations />} />
+          <Route path="reviews" element={<AdminReviews />} />
         </Route>
       </Routes>
     </BrowserRouter>
