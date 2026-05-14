@@ -35,7 +35,7 @@ server:
   port: 0
 
 jwt:
-  secret: ${JWT_SECRET:testSecretKeyForUnitTestingOnly2024HotelManagement}
+  secret: ${JWT_SECRET:testSecretKeyForUnitTestingOnly2026HotelManagement}
   expiration: 86400000
 
 logging:

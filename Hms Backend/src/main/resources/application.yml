@@ -11,7 +11,7 @@ server:
 
 # Common configuration
 jwt:
-  secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentOnlyChangeInProduction2024HMS}
+  secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentOnlyChangeInProduction2026HMS}
   expiration: ${JWT_EXPIRATION:86400000}
 
 springdoc:

@@ -68,7 +68,7 @@ jobs:
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 6379
           REDIS_PASSWORD: ""
-          JWT_SECRET: ciTestSecretKeyForGitHubActions2024HMS
+          JWT_SECRET: ciTestSecretKeyForGitHubActions2026HMS
           SPRING_PROFILES_ACTIVE: test
         run: ./mvnw -B clean test
 
