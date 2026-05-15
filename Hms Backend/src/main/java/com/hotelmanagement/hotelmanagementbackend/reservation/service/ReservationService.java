@@ -23,5 +23,7 @@ public interface ReservationService {
 
     PagedResponse<ReservationResponseDto> getReservationsByEmail(String email, Pageable pageable);
 
+    LocalDate getRoomAvailableAfter(Integer roomId);
+
     long getTotalReservations();
 }

@@ -11,9 +11,13 @@ export default function BookingPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('PAY_ON_PREMISES');
   const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '', checkInDate: '', checkOutDate: '' });
   const [error, setError] = useState('');
+  const today = new Date().toISOString().split('T')[0];
+  const checkoutMinDate = form.checkInDate
+    ? new Date(new Date(form.checkInDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    : today;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,23 +33,24 @@ export default function BookingPage() {
 
   const totalNights = form.checkInDate && form.checkOutDate
     ? Math.max(1, Math.ceil((new Date(form.checkOutDate) - new Date(form.checkInDate)) / (1000 * 60 * 60 * 24))) : 0;
-  const totalPrice = room?.roomType?.pricePerNight ? totalNights * room.roomType.pricePerNight : 0;
+  const pricePerNight = Number(room?.roomType?.pricePerNight || 0);
+  const totalPrice = totalNights * pricePerNight;
 
   const handleContinueToPayment = (e) => {
     e.preventDefault(); setError('');
     if (!form.checkInDate || !form.checkOutDate) { setError('Please select check-in and check-out dates'); return; }
+    if (form.checkInDate < today) { setError('Check-in cannot be before today'); return; }
     if (new Date(form.checkInDate) >= new Date(form.checkOutDate)) { setError('Check-out must be after check-in'); return; }
     setStep(2);
   };
 
   const handleSubmit = async () => {
-    if (!paymentMethod) { setError('Please select a payment method'); return; }
     setError(''); setSubmitting(true);
     try {
       const res = await reservationService.create({ ...form, roomId: parseInt(roomId) });
       const reservation = res.data?.data;
       if (reservation && room?.roomType) {
-        await paymentService.create({ reservationId: reservation.reservationId, amount: totalPrice, paymentDate: new Date().toISOString().split('T')[0], paymentStatus: paymentMethod === 'PAY_ONLINE' ? 'Paid' : 'Pending', paymentMethod });
+        await paymentService.create({ reservationId: reservation.reservationId, amount: totalPrice, paymentDate: today, paymentStatus: 'Pending', paymentMethod });
       }
       navigate('/reservations');
     } catch (err) { setError(err.response?.data?.message || 'Booking failed.'); }
@@ -70,8 +75,8 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-100 mb-2">{step === 1 ? 'Book Your Stay' : 'Choose Payment Method'}</h1>
-      {room && <p className="text-gray-400 mb-8">Room {room.roomNumber} — {room.roomType?.typeName} — ₹{room.roomType?.pricePerNight}/night</p>}
+      <h1 className="text-2xl font-bold text-gray-100 mb-2">{step === 1 ? 'Book Your Stay' : 'Payment Instructions'}</h1>
+      {room && <p className="text-gray-400 mb-8">Room {room.roomNumber} — {room.roomType?.typeName} — ₹{pricePerNight.toFixed(2)}/night</p>}
       {error && <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-400">{error}</div>}
 
       {step === 1 && (
@@ -80,13 +85,13 @@ export default function BookingPage() {
           <div><label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label><input type="email" required value={form.guestEmail} onChange={e => setForm({...form, guestEmail: e.target.value})} className={inputClass} /></div>
           <div><label className="block text-sm font-medium text-gray-300 mb-1.5">Phone</label><input type="tel" required value={form.guestPhone} onChange={e => setForm({...form, guestPhone: e.target.value})} className={inputClass} /></div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm font-medium text-gray-300 mb-1.5">Check-in</label><input type="date" required value={form.checkInDate} onChange={e => setForm({...form, checkInDate: e.target.value})} className={inputClass} /></div>
-            <div><label className="block text-sm font-medium text-gray-300 mb-1.5">Check-out</label><input type="date" required value={form.checkOutDate} onChange={e => setForm({...form, checkOutDate: e.target.value})} className={inputClass} /></div>
+            <div><label className="block text-sm font-medium text-gray-300 mb-1.5">Check-in</label><input type="date" required min={today} value={form.checkInDate} onChange={e => setForm({...form, checkInDate: e.target.value, checkOutDate: e.target.value >= form.checkOutDate ? '' : form.checkOutDate})} className={inputClass} /></div>
+            <div><label className="block text-sm font-medium text-gray-300 mb-1.5">Check-out</label><input type="date" required min={checkoutMinDate} value={form.checkOutDate} onChange={e => setForm({...form, checkOutDate: e.target.value})} className={inputClass} /></div>
           </div>
           {totalNights > 0 && (
             <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">₹{room?.roomType?.pricePerNight}/night × {totalNights} night{totalNights > 1 ? 's' : ''}</span>
+                <span className="text-gray-400">₹{pricePerNight.toFixed(2)}/night × {totalNights} night{totalNights > 1 ? 's' : ''}</span>
                 <span className="font-bold text-gray-100">₹{totalPrice.toFixed(2)}</span>
               </div>
             </div>
@@ -115,19 +120,9 @@ export default function BookingPage() {
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${paymentMethod === 'PAY_ON_PREMISES' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'}`}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               </div>
-              <div className="text-left flex-1"><p className="font-semibold text-gray-100">Pay on Premises</p><p className="text-sm text-gray-400 mt-0.5">Pay at the hotel during check-in</p></div>
+              <div className="text-left flex-1"><p className="font-semibold text-gray-100">Pay on Premises</p><p className="text-sm text-gray-400 mt-0.5">No charges or pre-payment are required now. Pay the full amount at the hotel during check-in.</p></div>
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'PAY_ON_PREMISES' ? 'border-blue-500' : 'border-gray-600'}`}>
                 {paymentMethod === 'PAY_ON_PREMISES' && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
-              </div>
-            </button>
-            <button type="button" onClick={() => setPaymentMethod('PAY_ONLINE')}
-              className={`w-full flex items-center gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'PAY_ONLINE' ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'}`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${paymentMethod === 'PAY_ONLINE' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'}`}>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-              </div>
-              <div className="text-left flex-1"><p className="font-semibold text-gray-100">Pay Online</p><p className="text-sm text-gray-400 mt-0.5">Secure online payment via card</p></div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'PAY_ONLINE' ? 'border-blue-500' : 'border-gray-600'}`}>
-                {paymentMethod === 'PAY_ONLINE' && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
               </div>
             </button>
           </div>

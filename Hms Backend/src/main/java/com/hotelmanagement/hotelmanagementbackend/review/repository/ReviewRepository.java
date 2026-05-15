@@ -23,6 +23,9 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     @RestResource(path = "by-reservation", rel = "by-reservation")
     Page<Review> findByReservation_ReservationId(@Param("reservationId") Integer reservationId, Pageable pageable);
 
+    @RestResource(path = "by-hotel", rel = "by-hotel")
+    Page<Review> findByReservation_Room_Hotel_HotelId(@Param("hotelId") Integer hotelId, Pageable pageable);
+
     @RestResource(exported = false)
     Optional<Review> findFirstByOrderByReviewDateDesc();
 

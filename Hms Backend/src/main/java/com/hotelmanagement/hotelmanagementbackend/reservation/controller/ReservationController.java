@@ -88,6 +88,14 @@ public class ReservationController {
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Reservations retrieved", response));
     }
 
+    @GetMapping("/room/{room_id}/available-after")
+    @Operation(summary = "Get the latest checkout date for a room")
+    public ResponseEntity<ApiResponse<LocalDate>> getRoomAvailableAfter(
+            @PathVariable("room_id") Integer roomId) {
+        LocalDate availableAfter = reservationService.getRoomAvailableAfter(roomId);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Room availability date retrieved", availableAfter));
+    }
+
     @PutMapping("/update/{reservation_id}")
     @Operation(summary = "Update reservation")
     public ResponseEntity<ApiResponse<ReservationResponseDto>> updateReservation(

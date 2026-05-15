@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { hotelService, roomService } from '../services/hotelApi';
+import { hotelService, roomService, reservationService, reviewService } from '../services/hotelApi';
 
 export default function HotelDetailPage() {
   const { id } = useParams();
   const [hotel, setHotel] = useState(null);
   const [rooms, setRooms] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewPage, setReviewPage] = useState(0);
+  const [reviewTotalPages, setReviewTotalPages] = useState(0);
+  const [bookedUntil, setBookedUntil] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,15 +20,41 @@ export default function HotelDetailPage() {
           roomService.getByHotel(id, 0, 100),
         ]);
         setHotel(hotelRes.data?.data);
-        setRooms(roomsRes.data?.data?.content || []);
+        const roomList = roomsRes.data?.data?.content || [];
+        setRooms(roomList);
+        const bookedRooms = roomList.filter(room => !room.isAvailable);
+        const availabilityEntries = await Promise.all(bookedRooms.map(async (room) => {
+          try {
+            const res = await reservationService.getRoomAvailableAfter(room.roomId);
+            return [room.roomId, res.data?.data];
+          } catch {
+            return [room.roomId, null];
+          }
+        }));
+        setBookedUntil(Object.fromEntries(availabilityEntries));
       } catch (err) { console.error('Failed to load hotel:', err); }
       finally { setLoading(false); }
     };
     fetchData();
   }, [id]);
 
+  useEffect(() => {
+    reviewService.getByHotel(id, reviewPage, 5).then((res) => {
+      setReviews(res.data?.data?.content || []);
+      setReviewTotalPages(res.data?.data?.totalPages || 0);
+    }).catch(console.error);
+  }, [id, reviewPage]);
+
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><div className="w-8 h-8 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" /></div>;
   if (!hotel) return <div className="max-w-7xl mx-auto px-4 py-20 text-center"><p className="text-gray-500">Hotel not found</p></div>;
+
+  const availableRooms = rooms.filter(room => room.isAvailable);
+  const bookedRooms = rooms.filter(room => !room.isAvailable);
+  const renderStars = (rating) => Array.from({ length: 5 }, (_, i) => (
+    <svg key={i} className={`w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  ));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -58,17 +88,15 @@ export default function HotelDetailPage() {
       )}
       <div>
         <h2 className="text-xl font-semibold text-gray-100 mb-4">Available Rooms</h2>
-        {rooms.length === 0 ? (
-          <p className="text-gray-500">No rooms available at the moment</p>
+        {availableRooms.length === 0 ? (
+          <p className="text-gray-500">No rooms available</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {rooms.map((room) => (
+            {availableRooms.map((room) => (
               <div key={room.roomId} className="bg-gray-900 rounded-xl border border-gray-800 p-5 hover:border-gray-700 hover:shadow-lg hover:shadow-blue-500/5 transition-all">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-lg font-semibold text-gray-100">Room {room.roomNumber}</span>
-                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${room.isAvailable ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                    {room.isAvailable ? 'Available' : 'Booked'}
-                  </span>
+                  <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-500/20 text-green-400">Available</span>
                 </div>
                 {room.roomType && (
                   <div className="space-y-1 text-sm text-gray-400">
@@ -85,11 +113,57 @@ export default function HotelDetailPage() {
                     {room.amenities.length > 3 && <span className="text-xs text-gray-500">+{room.amenities.length - 3}</span>}
                   </div>
                 )}
-                {room.isAvailable && (
-                  <Link to={`/booking/${room.roomId}`} className="mt-4 block text-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Book Now</Link>
+                <Link to={`/booking/${room.roomId}`} className="mt-4 block text-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">Book Now</Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {bookedRooms.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold text-gray-100 mb-4">Booked Rooms</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {bookedRooms.map((room) => (
+              <div key={room.roomId} className="bg-gray-900 rounded-xl border border-gray-800 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-lg font-semibold text-gray-100">Room {room.roomNumber}</span>
+                  <span className="px-2 py-1 text-xs rounded-full font-medium bg-red-500/20 text-red-400">Booked</span>
+                </div>
+                {room.roomType && (
+                  <div className="space-y-1 text-sm text-gray-400">
+                    <p>{room.roomType.typeName}</p>
+                    <p>Up to {room.roomType.maxOccupancy} guests</p>
+                    <p className="text-gray-500">Available after {bookedUntil[room.roomId] || 'current booking'}</p>
+                  </div>
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold text-gray-100 mb-4">Reviews</h2>
+        {reviews.length === 0 ? (
+          <p className="text-gray-500">No reviews yet</p>
+        ) : (
+          <div className="space-y-3">
+            {reviews.map(review => (
+              <div key={review.reviewId} className="bg-gray-900 rounded-xl border border-gray-800 p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex">{renderStars(review.rating)}</div>
+                  <span className="text-sm font-bold text-yellow-400">{review.rating}/5</span>
+                  <span className="text-xs text-gray-500">{review.reviewDate}</span>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">{review.comment || 'No comment provided.'}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {reviewTotalPages > 1 && (
+          <div className="mt-6 flex justify-center gap-2">
+            <button onClick={() => setReviewPage(Math.max(0, reviewPage - 1))} disabled={reviewPage === 0} className="px-4 py-2 text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-lg disabled:opacity-50 cursor-pointer">Previous</button>
+            <span className="px-4 py-2 text-sm text-gray-500">Page {reviewPage + 1} of {reviewTotalPages}</span>
+            <button onClick={() => setReviewPage(Math.min(reviewTotalPages - 1, reviewPage + 1))} disabled={reviewPage >= reviewTotalPages - 1} className="px-4 py-2 text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-lg disabled:opacity-50 cursor-pointer">Next</button>
           </div>
         )}
       </div>

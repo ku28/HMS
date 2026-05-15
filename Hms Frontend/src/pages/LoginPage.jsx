@@ -24,9 +24,9 @@ export default function LoginPage() {
       login({ fullName: data.fullName, email: data.email, role: data.role }, data.token);
       // If there's a redirect path (e.g. from booking), go there; otherwise default
       if (redirectTo) {
-        navigate(redirectTo);
+        navigate(redirectTo, { replace: true });
       } else {
-        navigate(data.role === 'ROLE_ADMIN' ? '/admin' : '/');
+        navigate(data.role === 'ROLE_ADMIN' ? '/admin' : '/', { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials');

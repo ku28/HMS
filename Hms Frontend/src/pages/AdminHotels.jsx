@@ -30,17 +30,23 @@ export default function AdminHotels() {
         amenityService.getAll(0, 100),
       ]);
       const hotelList = hRes.data?.data?.content || [];
-      setHotels(hotelList);
       setTotalPages(hRes.data?.data?.totalPages || 0);
       setAmenities(aRes.data?.data?.content || []);
-      // Fetch room counts for each hotel
       const counts = {};
-      await Promise.all(hotelList.map(async (h) => {
+      const enrichedHotels = await Promise.all(hotelList.map(async (h) => {
         try {
-          const rRes = await roomService.getByHotel(h.hotelId, 0, 1);
+          const [rRes, amenityRes] = await Promise.all([
+            roomService.getByHotel(h.hotelId, 0, 1),
+            amenityService.getByHotel(h.hotelId),
+          ]);
           counts[h.hotelId] = rRes.data?.data?.totalElements || 0;
-        } catch { counts[h.hotelId] = 0; }
+          return { ...h, amenities: amenityRes.data?.data?.content || [] };
+        } catch {
+          counts[h.hotelId] = 0;
+          return { ...h, amenities: [] };
+        }
       }));
+      setHotels(enrichedHotels);
       setRoomCounts(counts);
     } catch (e) { console.error(e); }
     setLoading(false);

@@ -38,14 +38,22 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    @CacheEvict(value = "reservations", allEntries = true)
+    @CacheEvict(value = {"reservations", "rooms"}, allEntries = true)
     public ReservationResponseDto createReservation(ReservationRequestDto dto) {
-        if (dto.getCheckInDate().isAfter(dto.getCheckOutDate())) {
-            throw new BadRequestException("Check-in date must be before check-out date");
+        if (dto.getCheckInDate().isBefore(LocalDate.now())) {
+            throw new BadRequestException("Check-in date cannot be before today");
+        }
+
+        if (!dto.getCheckInDate().isBefore(dto.getCheckOutDate())) {
+            throw new BadRequestException("Check-out date must be after check-in date");
         }
 
         Room room = roomRepository.findById(dto.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room", "roomId", dto.getRoomId()));
+
+        if (Boolean.FALSE.equals(room.getIsAvailable())) {
+            throw new BadRequestException("Room is already booked");
+        }
 
         boolean isBooked = reservationRepository
                 .existsByRoom_RoomIdAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual(
@@ -58,6 +66,8 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = reservationMapper.toEntity(dto);
         reservation.setRoom(room);
         Reservation saved = reservationRepository.save(reservation);
+        room.setIsAvailable(false);
+        roomRepository.save(room);
         return reservationMapper.toResponseDto(saved);
     }
 
@@ -87,6 +97,18 @@ public class ReservationServiceImpl implements ReservationService {
                 .map(reservationMapper::toResponseDto)
                 .collect(Collectors.toList());
         return PagedResponseMapper.toPagedResponse(page, dtos);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LocalDate getRoomAvailableAfter(Integer roomId) {
+        if (!roomRepository.existsById(roomId)) {
+            throw new ResourceNotFoundException("Room", "roomId", roomId);
+        }
+        Page<Reservation> page = reservationRepository.findByRoom_RoomId(
+                roomId, org.springframework.data.domain.PageRequest.of(
+                        0, 1, org.springframework.data.domain.Sort.by("checkOutDate").descending()));
+        return page.hasContent() ? page.getContent().get(0).getCheckOutDate() : null;
     }
 
     @Override
