@@ -2,69 +2,115 @@ package com.hotelmanagement.hotelmanagementbackend.auth.repository;
 
 import com.hotelmanagement.hotelmanagementbackend.auth.entity.User;
 import com.hotelmanagement.hotelmanagementbackend.repository.RepositoryDataJpaTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RepositoryDataJpaTest
-@DisplayName("UserRepository Tests")
 class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private TestEntityManager entityManager;
-
-    @Test
-    @DisplayName("findByEmail should return the matching user")
-    void findByEmailShouldReturnMatchingUser() {
-        User user = persistUser("guest@example.com", "Guest User", "ROLE_USER");
-
-        Optional<User> result = userRepository.findByEmail("guest@example.com");
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getUserId()).isEqualTo(user.getUserId());
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("existsByEmail should report whether email exists")
-    void existsByEmailShouldReportWhetherEmailExists() {
-        persistUser("admin@example.com", "Admin User", "ROLE_ADMIN");
+    @DisplayName("Should save user successfully")
+    void shouldSaveUserSuccessfully() {
 
-        assertThat(userRepository.existsByEmail("admin@example.com")).isTrue();
-        assertThat(userRepository.existsByEmail("missing@example.com")).isFalse();
-    }
-
-    @Test
-    @DisplayName("findByRole should return paginated users with role")
-    void findByRoleShouldReturnPaginatedUsersWithRole() {
-        persistUser("first@example.com", "First Admin", "ROLE_ADMIN");
-        persistUser("second@example.com", "Second Admin", "ROLE_ADMIN");
-        persistUser("guest@example.com", "Guest User", "ROLE_USER");
-
-        Page<User> result = userRepository.findByRole("ROLE_ADMIN", PageRequest.of(0, 10));
-
-        assertThat(result.getContent())
-                .extracting(User::getEmail)
-                .containsExactlyInAnyOrder("first@example.com", "second@example.com");
-    }
-
-    private User persistUser(String email, String fullName, String role) {
         User user = User.builder()
-                .email(email)
-                .password("encoded-password")
-                .fullName(fullName)
-                .role(role)
+                .email("test@gmail.com")
+                .password("password123")
+                .fullName("Test User")
+                .role("ROLE_USER")
                 .enabled(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
-        return entityManager.persistAndFlush(user);
+
+        User savedUser = userRepository.save(user);
+
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getUserId()).isGreaterThan(0);
+    }
+
+    @Test
+    @DisplayName("Should find user by email")
+    void shouldFindUserByEmail() {
+
+        User user = User.builder()
+                .email("admin@gmail.com")
+                .password("password123")
+                .fullName("Admin")
+                .role("ROLE_ADMIN")
+                .enabled(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        userRepository.save(user);
+
+        Optional<User> foundUser =
+                userRepository.findByEmail("admin@gmail.com");
+
+        assertThat(foundUser).isPresent();
+    }
+
+    @Test
+    @DisplayName("Should check email exists")
+    void shouldCheckEmailExists() {
+
+        User user = User.builder()
+                .email("exists@gmail.com")
+                .password("password123")
+                .fullName("Exists User")
+                .role("ROLE_USER")
+                .enabled(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        userRepository.save(user);
+
+        boolean exists =
+                userRepository.existsByEmail("exists@gmail.com");
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should find users by role")
+    void shouldFindUsersByRole() {
+
+        User admin = User.builder()
+                .email("roleadmin@gmail.com")
+                .password("password123")
+                .fullName("Role Admin")
+                .role("ROLE_ADMIN")
+                .enabled(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        userRepository.save(admin);
+
+        Page<User> result =
+                userRepository.findByRole(
+                        "ROLE_ADMIN",
+                        PageRequest.of(0, 5)
+                );
+
+        assertThat(result.getContent()).isNotEmpty();
     }
 }

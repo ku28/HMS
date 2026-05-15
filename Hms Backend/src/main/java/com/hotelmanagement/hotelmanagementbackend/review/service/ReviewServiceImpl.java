@@ -59,9 +59,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ReviewResponseDto> getAllReviews(Pageable pageable) {
-        Page<Review> page = reviewRepository.findByRating(null, pageable);
-        // Get all reviews using a broad rating search
-        page = reviewRepository.findByReservation_ReservationId(null, pageable);
+        Page<Review> page = reviewRepository.findByReviewIdGreaterThan(0, pageable);
         List<ReviewResponseDto> dtos = page.getContent().stream()
                 .map(reviewMapper::toResponseDto)
                 .collect(Collectors.toList());

@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/roomAmenity")
+@RequestMapping("/api/room-management/room-amenities")
 @Tag(name = "RoomAmenity", description = "Room Amenity Association APIs")
 public class RoomAmenityController {
 
@@ -22,7 +22,7 @@ public class RoomAmenityController {
         this.roomService = roomService;
     }
 
-    @PostMapping("/post")
+    @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Associate amenity with room")
     public ResponseEntity<ApiResponse<Void>> addAmenityToRoom(

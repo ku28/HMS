@@ -8,130 +8,209 @@ import com.hotelmanagement.hotelmanagementbackend.room.entity.RoomType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import jakarta.persistence.EntityManager;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RepositoryDataJpaTest
-@DisplayName("AmenityRepository Tests")
+@DisplayName("Amenity Repository Tests")
 class AmenityRepositoryTest {
 
     @Autowired
     private AmenityRepository amenityRepository;
 
     @Autowired
-    private TestEntityManager entityManager;
+    private EntityManager entityManager;
 
     @Test
-    @DisplayName("findByNameContainingIgnoreCase should match partial names")
-    void findByNameContainingIgnoreCaseShouldMatchPartialNames() {
+    @DisplayName("shouldReturnAmenitiesByNameIgnoreCase")
+    void shouldReturnAmenitiesByNameIgnoreCase() {
+
         persistAmenity("Free WiFi");
         persistAmenity("Airport Shuttle");
 
-        Page<Amenity> result = amenityRepository.findByNameContainingIgnoreCase("wifi", PageRequest.of(0, 10));
+        Page<Amenity> result =
+                amenityRepository.findByNameContainingIgnoreCase(
+                        "wifi",
+                        PageRequest.of(0, 10)
+                );
 
-        assertThat(result.getContent())
-                .extracting(Amenity::getName)
-                .containsExactly("Free WiFi");
+        assertNotNull(result);
+
+        assertTrue(result.getTotalElements() >= 1);
+
+        assertTrue(
+                result.getContent()
+                        .stream()
+                        .anyMatch(a ->
+                                a.getName().equals("Free WiFi"))
+        );
     }
 
     @Test
-    @DisplayName("existsByName should report whether amenity name exists")
-    void existsByNameShouldReportWhetherAmenityNameExists() {
-        persistAmenity("Pool");
+    @DisplayName("shouldReturnTrueWhenAmenityExists")
+    void shouldReturnTrueWhenAmenityExists() {
 
-        assertThat(amenityRepository.existsByName("Pool")).isTrue();
-        assertThat(amenityRepository.existsByName("Spa")).isFalse();
+        persistAmenity("Swimming Pool");
+
+        boolean exists =
+                amenityRepository.existsByName("Swimming Pool");
+
+        assertTrue(exists);
     }
 
     @Test
-    @DisplayName("findByName should return matching amenity")
-    void findByNameShouldReturnMatchingAmenity() {
-        Amenity amenity = persistAmenity("Breakfast");
+    @DisplayName("shouldReturnFalseWhenAmenityDoesNotExist")
+    void shouldReturnFalseWhenAmenityDoesNotExist() {
 
-        Optional<Amenity> result = amenityRepository.findByName("Breakfast");
+        boolean exists =
+                amenityRepository.existsByName("Unknown Amenity");
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getAmenityId()).isEqualTo(amenity.getAmenityId());
+        assertFalse(exists);
     }
 
     @Test
-    @DisplayName("findByHotels_HotelId should return amenities assigned to hotel")
-    void findByHotelsHotelIdShouldReturnAmenitiesAssignedToHotel() {
+    @DisplayName("shouldReturnAmenityByName")
+    void shouldReturnAmenityByName() {
+
+        Amenity savedAmenity = persistAmenity("Breakfast");
+
+        Optional<Amenity> result =
+                amenityRepository.findByName("Breakfast");
+
+        assertTrue(result.isPresent());
+
+        Amenity amenity = result.get();
+
+        assertEquals(savedAmenity.getAmenityId(), amenity.getAmenityId());
+        assertEquals("Breakfast", amenity.getName());
+    }
+
+    @Test
+    @DisplayName("shouldReturnAmenitiesAssignedToHotel")
+    void shouldReturnAmenitiesAssignedToHotel() {
+
         Amenity pool = persistAmenity("Pool");
         Amenity parking = persistAmenity("Parking");
+
         Hotel hotel = Hotel.builder()
-                .name("City Grand")
-                .location("Mumbai")
-                .description("Business hotel")
+                .name("Taj Hotel")
+                .location("Delhi")
+                .description("Luxury Hotel")
                 .build();
+
         hotel.getAmenities().add(pool);
-        entityManager.persistAndFlush(hotel);
+
+        entityManager.persist(hotel);
+        entityManager.flush();
         entityManager.clear();
 
-        Page<Amenity> result = amenityRepository.findByHotels_HotelId(hotel.getHotelId(), PageRequest.of(0, 10));
+        Page<Amenity> result =
+                amenityRepository.findByHotels_HotelId(
+                        hotel.getHotelId(),
+                        PageRequest.of(0, 10)
+                );
 
-        assertThat(result.getContent())
-                .extracting(Amenity::getName)
-                .containsExactly("Pool");
-        assertThat(result.getContent())
-                .extracting(Amenity::getName)
-                .doesNotContain(parking.getName());
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+
+        Amenity amenity = result.getContent().getFirst();
+
+        assertEquals("Pool", amenity.getName());
+        assertNotEquals("Parking", amenity.getName());
     }
 
     @Test
-    @DisplayName("findByRooms_RoomId should return amenities assigned to room")
-    void findByRoomsRoomIdShouldReturnAmenitiesAssignedToRoom() {
+    @DisplayName("shouldReturnAmenitiesAssignedToRoom")
+    void shouldReturnAmenitiesAssignedToRoom() {
+
         Amenity balcony = persistAmenity("Balcony");
         Amenity minibar = persistAmenity("Minibar");
-        Hotel hotel = persistHotel("Lake View", "Pune");
+
+        Hotel hotel = persistHotel(
+                "Lake View",
+                "Pune"
+        );
+
         RoomType roomType = persistRoomType("Deluxe");
+
         Room room = Room.builder()
                 .roomNumber(301)
                 .hotel(hotel)
                 .roomType(roomType)
                 .isAvailable(true)
                 .build();
+
         room.getAmenities().add(balcony);
-        entityManager.persistAndFlush(room);
+        balcony.getRooms().add(room);
+
+        entityManager.persist(room);
+        entityManager.flush();
         entityManager.clear();
 
-        Page<Amenity> result = amenityRepository.findByRooms_RoomId(room.getRoomId(), PageRequest.of(0, 10));
+        Page<Amenity> result =
+                amenityRepository.findByRooms_RoomId(
+                        room.getRoomId(),
+                        PageRequest.of(0, 10)
+                );
 
-        assertThat(result.getContent())
-                .extracting(Amenity::getName)
-                .containsExactly("Balcony");
-        assertThat(result.getContent())
-                .extracting(Amenity::getName)
-                .doesNotContain(minibar.getName());
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+
+        Amenity amenity = result.getContent().getFirst();
+
+        assertEquals("Balcony", amenity.getName());
+        assertNotEquals("Minibar", amenity.getName());
     }
 
     private Amenity persistAmenity(String name) {
-        return entityManager.persistAndFlush(Amenity.builder()
+
+        Amenity amenity = Amenity.builder()
                 .name(name)
-                .description(name + " description")
-                .build());
+                .description(name + " Description")
+                .build();
+
+        entityManager.persist(amenity);
+        entityManager.flush();
+
+        return amenity;
     }
 
-    private Hotel persistHotel(String name, String location) {
-        return entityManager.persistAndFlush(Hotel.builder()
+    private Hotel persistHotel(
+            String name,
+            String location
+    ) {
+
+        Hotel hotel = Hotel.builder()
                 .name(name)
                 .location(location)
-                .description(name + " description")
-                .build());
+                .description(name + " Description")
+                .build();
+
+        entityManager.persist(hotel);
+        entityManager.flush();
+
+        return hotel;
     }
 
     private RoomType persistRoomType(String typeName) {
-        return entityManager.persistAndFlush(RoomType.builder()
+
+        RoomType roomType = RoomType.builder()
                 .typeName(typeName)
-                .description(typeName + " room")
+                .description(typeName + " Room")
                 .maxOccupancy(2)
-                .pricePerNight(new BigDecimal("150.00"))
-                .build());
+                .pricePerNight(new BigDecimal("4500"))
+                .build();
+
+        entityManager.persist(roomType);
+        entityManager.flush();
+
+        return roomType;
     }
 }

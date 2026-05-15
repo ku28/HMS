@@ -72,7 +72,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ReservationResponseDto> getAllReservations(Pageable pageable) {
-        Page<Reservation> page = reservationRepository.findAll(pageable);
+        Page<Reservation> page = reservationRepository.findByReservationIdGreaterThan(0, pageable);
         List<ReservationResponseDto> dtos = page.getContent().stream()
                 .map(reservationMapper::toResponseDto)
                 .collect(Collectors.toList());

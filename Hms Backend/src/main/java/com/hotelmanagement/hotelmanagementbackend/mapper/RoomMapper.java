@@ -1,12 +1,8 @@
 package com.hotelmanagement.hotelmanagementbackend.mapper;
 
-import com.hotelmanagement.hotelmanagementbackend.hotel.dto.AmenityResponseDto;
 import com.hotelmanagement.hotelmanagementbackend.room.dto.RoomRequestDto;
 import com.hotelmanagement.hotelmanagementbackend.room.dto.RoomResponseDto;
-import com.hotelmanagement.hotelmanagementbackend.room.dto.RoomTypeRequestDto;
-import com.hotelmanagement.hotelmanagementbackend.room.dto.RoomTypeResponseDto;
 import com.hotelmanagement.hotelmanagementbackend.room.entity.Room;
-import com.hotelmanagement.hotelmanagementbackend.room.entity.RoomType;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -15,34 +11,6 @@ import java.util.stream.Collectors;
 @Component
 public class RoomMapper {
 
-    public RoomTypeResponseDto toRoomTypeResponseDto(RoomType roomType) {
-        if (roomType == null) return null;
-        return RoomTypeResponseDto.builder()
-                .roomTypeId(roomType.getRoomTypeId())
-                .typeName(roomType.getTypeName())
-                .description(roomType.getDescription())
-                .maxOccupancy(roomType.getMaxOccupancy())
-                .pricePerNight(roomType.getPricePerNight())
-                .build();
-    }
-
-    public RoomType toRoomTypeEntity(RoomTypeRequestDto dto) {
-        if (dto == null) return null;
-        return RoomType.builder()
-                .typeName(dto.getTypeName())
-                .description(dto.getDescription())
-                .maxOccupancy(dto.getMaxOccupancy())
-                .pricePerNight(dto.getPricePerNight())
-                .build();
-    }
-
-    public void updateRoomTypeEntity(RoomType roomType, RoomTypeRequestDto dto) {
-        if (dto.getTypeName() != null) roomType.setTypeName(dto.getTypeName());
-        if (dto.getDescription() != null) roomType.setDescription(dto.getDescription());
-        if (dto.getMaxOccupancy() != null) roomType.setMaxOccupancy(dto.getMaxOccupancy());
-        if (dto.getPricePerNight() != null) roomType.setPricePerNight(dto.getPricePerNight());
-    }
-
     public RoomResponseDto toRoomResponseDto(Room room) {
         if (room == null) return null;
         return RoomResponseDto.builder()
@@ -50,15 +18,14 @@ public class RoomMapper {
                 .roomNumber(room.getRoomNumber())
                 .hotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null)
                 .hotelName(room.getHotel() != null ? room.getHotel().getName() : null)
-                .roomType(room.getRoomType() != null ? toRoomTypeResponseDto(room.getRoomType()) : null)
+                .roomTypeId(room.getRoomType() != null ? room.getRoomType().getRoomTypeId() : null)
+                .roomTypeName(room.getRoomType() != null ? room.getRoomType().getTypeName() : null)
+                .maxOccupancy(room.getRoomType() != null ? room.getRoomType().getMaxOccupancy() : null)
+                .pricePerNight(room.getRoomType() != null ? room.getRoomType().getPricePerNight() : null)
                 .isAvailable(room.getIsAvailable())
                 .amenities(room.getAmenities() != null
                         ? room.getAmenities().stream()
-                        .map(a -> AmenityResponseDto.builder()
-                                .amenityId(a.getAmenityId())
-                                .name(a.getName())
-                                .description(a.getDescription())
-                                .build())
+                        .map(a -> a.getName())
                         .collect(Collectors.toList())
                         : Collections.emptyList())
                 .build();
@@ -71,7 +38,10 @@ public class RoomMapper {
                 .roomNumber(room.getRoomNumber())
                 .hotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null)
                 .hotelName(room.getHotel() != null ? room.getHotel().getName() : null)
-                .roomType(room.getRoomType() != null ? toRoomTypeResponseDto(room.getRoomType()) : null)
+                .roomTypeId(room.getRoomType() != null ? room.getRoomType().getRoomTypeId() : null)
+                .roomTypeName(room.getRoomType() != null ? room.getRoomType().getTypeName() : null)
+                .maxOccupancy(room.getRoomType() != null ? room.getRoomType().getMaxOccupancy() : null)
+                .pricePerNight(room.getRoomType() != null ? room.getRoomType().getPricePerNight() : null)
                 .isAvailable(room.getIsAvailable())
                 .amenities(Collections.emptyList())
                 .build();

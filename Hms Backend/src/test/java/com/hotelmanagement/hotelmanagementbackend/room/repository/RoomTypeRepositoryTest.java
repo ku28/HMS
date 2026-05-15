@@ -2,10 +2,10 @@ package com.hotelmanagement.hotelmanagementbackend.room.repository;
 
 import com.hotelmanagement.hotelmanagementbackend.repository.RepositoryDataJpaTest;
 import com.hotelmanagement.hotelmanagementbackend.room.entity.RoomType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -14,43 +14,83 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RepositoryDataJpaTest
-@DisplayName("RoomTypeRepository Tests")
 class RoomTypeRepositoryTest {
 
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
-    @Autowired
-    private TestEntityManager entityManager;
-
-    @Test
-    @DisplayName("findByTypeNameContainingIgnoreCase should match partial room type names")
-    void findByTypeNameContainingIgnoreCaseShouldMatchPartialRoomTypeNames() {
-        persistRoomType("Deluxe Suite");
-        persistRoomType("Standard Room");
-
-        Page<RoomType> result = roomTypeRepository.findByTypeNameContainingIgnoreCase("suite", PageRequest.of(0, 10));
-
-        assertThat(result.getContent())
-                .extracting(RoomType::getTypeName)
-                .containsExactly("Deluxe Suite");
+    @BeforeEach
+    void setUp() {
+        roomTypeRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("existsByTypeName should report whether room type exists")
-    void existsByTypeNameShouldReportWhetherRoomTypeExists() {
-        persistRoomType("Executive Room");
+    @DisplayName("shouldReturnRoomTypesByNameIgnoreCase")
+    void shouldReturnRoomTypesByNameIgnoreCase() {
 
-        assertThat(roomTypeRepository.existsByTypeName("Executive Room")).isTrue();
-        assertThat(roomTypeRepository.existsByTypeName("Presidential Suite")).isFalse();
-    }
+        // Arrange
+        RoomType deluxe = RoomType.builder()
+                .typeName("Deluxe")
+                .description("Luxury Room")
+                .maxOccupancy(4)
+                .pricePerNight(new BigDecimal("5000"))
+                .build();
 
-    private RoomType persistRoomType(String typeName) {
-        return entityManager.persistAndFlush(RoomType.builder()
-                .typeName(typeName)
-                .description(typeName + " description")
+        RoomType standard = RoomType.builder()
+                .typeName("Standard")
+                .description("Standard Room")
                 .maxOccupancy(2)
-                .pricePerNight(new BigDecimal("200.00"))
-                .build());
+                .pricePerNight(new BigDecimal("3000"))
+                .build();
+
+        roomTypeRepository.save(deluxe);
+        roomTypeRepository.save(standard);
+
+        // Act
+        Page<RoomType> result =
+                roomTypeRepository.findByTypeNameContainingIgnoreCase(
+                        "del",
+                        PageRequest.of(0, 10)
+                );
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+
+        assertThat(result.getContent().get(0).getTypeName())
+                .isEqualTo("Deluxe");
+    }
+
+    @Test
+    @DisplayName("shouldCheckIfRoomTypeExists")
+    void shouldCheckIfRoomTypeExists() {
+
+        // Arrange
+        RoomType deluxe = RoomType.builder()
+                .typeName("Deluxe")
+                .description("Luxury Room")
+                .maxOccupancy(4)
+                .pricePerNight(new BigDecimal("5000"))
+                .build();
+
+        roomTypeRepository.save(deluxe);
+
+        // Act
+        boolean exists =
+                roomTypeRepository.existsByTypeName("Deluxe");
+
+        // Assert
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("shouldReturnFalseWhenRoomTypeDoesNotExist")
+    void shouldReturnFalseWhenRoomTypeDoesNotExist() {
+
+        // Act
+        boolean exists =
+                roomTypeRepository.existsByTypeName("Suite");
+
+        // Assert
+        assertThat(exists).isFalse();
     }
 }

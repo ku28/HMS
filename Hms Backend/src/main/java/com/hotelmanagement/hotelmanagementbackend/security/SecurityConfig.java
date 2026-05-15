@@ -46,17 +46,28 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/hotels/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/room/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/RoomType/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/amenity/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/review/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/amenities/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/room-types/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/hotels/**", "/api/amenities/**", "/api/room-types/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/hotels/**", "/api/amenities/**", "/api/room-types/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/hotels/**", "/api/amenities/**", "/api/room-types/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/hotels/**", "/api/amenities/**", "/api/room-types/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/room-management/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/roomAmenity/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/review-management/**").authenticated()
+                        .requestMatchers("/api/payments/**", "/api/reservations/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -69,7 +80,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

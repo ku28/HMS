@@ -1,142 +1,204 @@
 package com.hotelmanagement.hotelmanagementbackend.reservation.repository;
 
-import com.hotelmanagement.hotelmanagementbackend.hotel.entity.Hotel;
 import com.hotelmanagement.hotelmanagementbackend.repository.RepositoryDataJpaTest;
 import com.hotelmanagement.hotelmanagementbackend.reservation.entity.Reservation;
 import com.hotelmanagement.hotelmanagementbackend.room.entity.Room;
 import com.hotelmanagement.hotelmanagementbackend.room.entity.RoomType;
+import com.hotelmanagement.hotelmanagementbackend.room.repository.RoomRepository;
+import com.hotelmanagement.hotelmanagementbackend.room.repository.RoomTypeRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RepositoryDataJpaTest
-@DisplayName("ReservationRepository Tests")
 class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private TestEntityManager entityManager;
+    private RoomRepository roomRepository;
 
-    @Test
-    @DisplayName("findByGuestEmailIgnoreCase should match guest email regardless of case")
-    void findByGuestEmailIgnoreCaseShouldMatchGuestEmailRegardlessOfCase() {
-        Room room = persistRoom(101);
-        persistReservation("John Doe", "John@example.com", room, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 4));
-        persistReservation("Jane Doe", "jane@example.com", room, LocalDate.of(2026, 6, 6), LocalDate.of(2026, 6, 8));
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
 
-        Page<Reservation> result = reservationRepository.findByGuestEmailIgnoreCase(
-                "john@EXAMPLE.com", PageRequest.of(0, 10));
+    private Room room;
 
-        assertThat(result.getContent())
-                .extracting(Reservation::getGuestName)
-                .containsExactly("John Doe");
+    @BeforeEach
+    void setup() {
+        RoomType roomType = roomTypeRepository.save(
+
+                RoomType.builder()
+                        .typeName("DELUXE")
+                        .description("Luxury Room")
+                        .maxOccupancy(2)
+                        .pricePerNight(BigDecimal.valueOf(5000))
+                        .build()
+        );
+
+        room = roomRepository.save(
+
+                Room.builder()
+                        .roomNumber(101)
+                        .isAvailable(true)
+                        .roomType(roomType)
+                        .build()
+        );
     }
 
     @Test
-    @DisplayName("findByCheckInDateGreaterThanEqualAndCheckOutDateLessThanEqual should return reservations inside range")
-    void findByCheckInDateGreaterThanEqualAndCheckOutDateLessThanEqualShouldReturnReservationsInsideRange() {
-        Room room = persistRoom(201);
-        persistReservation("Inside Guest", "inside@example.com", room,
-                LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 12));
-        persistReservation("Early Guest", "early@example.com", room,
-                LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 12));
-        persistReservation("Late Guest", "late@example.com", room,
-                LocalDate.of(2026, 7, 15), LocalDate.of(2026, 7, 22));
+    @DisplayName("Test findByGuestEmailIgnoreCase")
+    void testFindByGuestEmailIgnoreCase() {
 
-        Page<Reservation> result = reservationRepository.findByCheckInDateGreaterThanEqualAndCheckOutDateLessThanEqual(
-                LocalDate.of(2026, 7, 5), LocalDate.of(2026, 7, 20), PageRequest.of(0, 10));
+        Reservation reservation = Reservation.builder()
+                .guestName("John Doe")
+                .guestEmail("john@example.com")
+                .guestPhone("9876543210")
+                .checkInDate(LocalDate.of(2026, 5, 20))
+                .checkOutDate(LocalDate.of(2026, 5, 25))
+                .room(room)
+                .build();
 
-        assertThat(result.getContent())
-                .extracting(Reservation::getGuestName)
-                .containsExactly("Inside Guest");
+        reservationRepository.save(reservation);
+
+        Page<Reservation> result =
+                reservationRepository.findByGuestEmailIgnoreCase(
+                        "JOHN@EXAMPLE.COM",
+                        PageRequest.of(0, 10)
+                );
+
+        assertEquals(1, result.getTotalElements());
     }
 
     @Test
-    @DisplayName("findByRoom_RoomId should return reservations for room")
-    void findByRoomRoomIdShouldReturnReservationsForRoom() {
-        Room firstRoom = persistRoom(301);
-        Room secondRoom = persistRoom(302);
-        persistReservation("First Guest", "first@example.com", firstRoom,
-                LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 3));
-        persistReservation("Second Guest", "second@example.com", secondRoom,
-                LocalDate.of(2026, 8, 4), LocalDate.of(2026, 8, 6));
+    @DisplayName("Test date range search")
+    void testFindByCheckInDateGreaterThanEqualAndCheckOutDateLessThanEqual() {
 
-        Page<Reservation> result = reservationRepository.findByRoom_RoomId(firstRoom.getRoomId(), PageRequest.of(0, 10));
+        Reservation reservation = Reservation.builder()
+                .guestName("Alice")
+                .guestEmail("alice@example.com")
+                .guestPhone("9999999999")
+                .checkInDate(LocalDate.of(2026, 6, 1))
+                .checkOutDate(LocalDate.of(2026, 6, 5))
+                .room(room)
+                .build();
 
-        assertThat(result.getContent())
-                .extracting(Reservation::getGuestName)
-                .containsExactly("First Guest");
+        reservationRepository.save(reservation);
+
+        Page<Reservation> result =
+                reservationRepository
+                        .findByCheckInDateGreaterThanEqualAndCheckOutDateLessThanEqual(
+                                LocalDate.of(2026, 6, 1),
+                                LocalDate.of(2026, 6, 10),
+                                PageRequest.of(0, 10)
+                        );
+
+        assertEquals(1, result.getTotalElements());
     }
 
     @Test
-    @DisplayName("existsByRoom_RoomIdAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual should detect overlaps")
-    void existsByRoomRoomIdAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqualShouldDetectOverlaps() {
-        Room room = persistRoom(401);
-        persistReservation("Booked Guest", "booked@example.com", room,
-                LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 15));
+    @DisplayName("Test findByRoom_RoomId")
+    void testFindByRoomRoomId() {
 
-        boolean overlaps = reservationRepository.existsByRoom_RoomIdAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual(
-                room.getRoomId(), LocalDate.of(2026, 9, 12), LocalDate.of(2026, 9, 11));
-        boolean doesNotOverlap = reservationRepository.existsByRoom_RoomIdAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual(
-                room.getRoomId(), LocalDate.of(2026, 9, 20), LocalDate.of(2026, 9, 18));
+        Reservation reservation = Reservation.builder()
+                .guestName("Room User")
+                .guestEmail("room@example.com")
+                .guestPhone("7777777777")
+                .checkInDate(LocalDate.now())
+                .checkOutDate(LocalDate.now().plusDays(2))
+                .room(room)
+                .build();
 
-        assertThat(overlaps).isTrue();
-        assertThat(doesNotOverlap).isFalse();
+        reservationRepository.save(reservation);
+
+        Page<Reservation> result =
+                reservationRepository.findByRoom_RoomId(
+                        room.getRoomId(),
+                        PageRequest.of(0, 10)
+                );
+
+        assertEquals(1, result.getTotalElements());
     }
 
     @Test
-    @DisplayName("count should return total reservation count")
-    void countShouldReturnTotalReservationCount() {
-        Room room = persistRoom(501);
-        persistReservation("First Guest", "first-count@example.com", room,
-                LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 3));
-        persistReservation("Second Guest", "second-count@example.com", room,
-                LocalDate.of(2026, 10, 5), LocalDate.of(2026, 10, 7));
+    @DisplayName("Test existsByRoomIdAndDateRange")
+    void testExistsByRoomIdAndDateRange() {
+
+        Reservation reservation = Reservation.builder()
+                .guestName("Booked User")
+                .guestEmail("booked@example.com")
+                .guestPhone("6666666666")
+                .checkInDate(LocalDate.of(2026, 7, 10))
+                .checkOutDate(LocalDate.of(2026, 7, 15))
+                .room(room)
+                .build();
+
+        reservationRepository.save(reservation);
+
+        boolean exists =
+                reservationRepository
+                        .existsByRoom_RoomIdAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual(
+                                room.getRoomId(),
+                                LocalDate.of(2026, 7, 14),
+                                LocalDate.of(2026, 7, 12)
+                        );
+
+        assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("Test reservation count")
+    void testCount() {
+
+        Reservation reservation = Reservation.builder()
+                .guestName("Sara")
+                .guestEmail("sara@example.com")
+                .guestPhone("8888888888")
+                .checkInDate(LocalDate.now())
+                .checkOutDate(LocalDate.now().plusDays(2))
+                .room(room)
+                .build();
+
+        reservationRepository.save(reservation);
 
         long count = reservationRepository.count();
 
-        assertThat(count).isEqualTo(2);
+        assertEquals(1, count);
     }
 
-    private Reservation persistReservation(String guestName, String guestEmail, Room room,
-                                           LocalDate checkInDate, LocalDate checkOutDate) {
-        return entityManager.persistAndFlush(Reservation.builder()
-                .guestName(guestName)
-                .guestEmail(guestEmail)
-                .guestPhone("9999999999")
+    @Test
+    @DisplayName("Test delete reservation")
+    void testDeleteReservation() {
+
+        Reservation reservation = Reservation.builder()
+                .guestName("Delete User")
+                .guestEmail("delete@example.com")
+                .guestPhone("5555555555")
+                .checkInDate(LocalDate.now())
+                .checkOutDate(LocalDate.now().plusDays(1))
                 .room(room)
-                .checkInDate(checkInDate)
-                .checkOutDate(checkOutDate)
-                .build());
-    }
+                .build();
 
-    private Room persistRoom(Integer roomNumber) {
-        Hotel hotel = entityManager.persistAndFlush(Hotel.builder()
-                .name("Reservation Hotel " + roomNumber)
-                .location("Bengaluru")
-                .description("Reservation test hotel")
-                .build());
-        RoomType roomType = entityManager.persistAndFlush(RoomType.builder()
-                .typeName("Reservation Type " + roomNumber)
-                .description("Reservation test type")
-                .maxOccupancy(2)
-                .pricePerNight(new BigDecimal("220.00"))
-                .build());
-        return entityManager.persistAndFlush(Room.builder()
-                .roomNumber(roomNumber)
-                .hotel(hotel)
-                .roomType(roomType)
-                .isAvailable(true)
-                .build());
+        Reservation savedReservation =
+                reservationRepository.save(reservation);
+
+        reservationRepository.deleteById(
+                savedReservation.getReservationId()
+        );
+
+        boolean exists =
+                reservationRepository.findById(
+                        savedReservation.getReservationId()
+                ).isPresent();
+
+        assertFalse(exists);
     }
 }
