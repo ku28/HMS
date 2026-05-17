@@ -56,29 +56,29 @@ jobs:
           mysql -h 127.0.0.1 -u root -proot hotel < db/create_hotel.sql
           mysql -h 127.0.0.1 -u root -proot hotel < db/create_users.sql
 
-      # - name: Run Tests
-      #   working-directory: ./Hms Backend
-      #   env:
-      #     DB_URL: jdbc:mysql://127.0.0.1:3306/hotel
-      #     DB_USERNAME: hotel_user
-      #     DB_PASSWORD: hotel_pass
-      #     REDIS_HOST: 127.0.0.1
-      #     REDIS_PORT: 6379
-      #     REDIS_PASSWORD: ""
-      #     JWT_SECRET: ciTestSecretKeyForGitHubActions2026HMS
-      #     SPRING_PROFILES_ACTIVE: test
-      #   run: ./mvnw -B clean test
+      - name: Run Tests
+        working-directory: ./Hms Backend
+        env:
+          DB_URL: jdbc:mysql://127.0.0.1:3306/hotel
+          DB_USERNAME: hotel_user
+          DB_PASSWORD: hotel_pass
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: ""
+          JWT_SECRET: ciTestSecretKeyForGitHubActions2026HMS
+          SPRING_PROFILES_ACTIVE: test
+        run: ./mvnw -B clean test
 
       - name: Build JAR (only if tests pass)
         working-directory: ./Hms Backend
         run: ./mvnw -B -DskipTests package
 
-      # - name: Upload Test Reports
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: test-reports
-      #     path: Hms Backend/target/surefire-reports/
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: Hms Backend/target/surefire-reports/
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
