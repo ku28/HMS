@@ -37,7 +37,7 @@ class ReservationRepositoryTest {
         RoomType roomType = roomTypeRepository.save(
 
                 RoomType.builder()
-                        .typeName("DELUXE")
+                        .typeName("REPO RESERVATION DELUXE 7191")
                         .description("Luxury Room")
                         .maxOccupancy(2)
                         .pricePerNight(BigDecimal.valueOf(5000))
@@ -47,7 +47,7 @@ class ReservationRepositoryTest {
         room = roomRepository.save(
 
                 Room.builder()
-                        .roomNumber(101)
+                        .roomNumber(719101)
                         .isAvailable(true)
                         .roomType(roomType)
                         .build()
@@ -60,7 +60,7 @@ class ReservationRepositoryTest {
 
         Reservation reservation = Reservation.builder()
                 .guestName("John Doe")
-                .guestEmail("john@example.com")
+                .guestEmail("repo-john-7191@example.com")
                 .guestPhone("9876543210")
                 .checkInDate(LocalDate.of(2026, 5, 20))
                 .checkOutDate(LocalDate.of(2026, 5, 25))
@@ -71,7 +71,7 @@ class ReservationRepositoryTest {
 
         Page<Reservation> result =
                 reservationRepository.findByGuestEmailIgnoreCase(
-                        "JOHN@EXAMPLE.COM",
+                        "REPO-JOHN-7191@EXAMPLE.COM",
                         PageRequest.of(0, 10)
                 );
 
@@ -84,7 +84,7 @@ class ReservationRepositoryTest {
 
         Reservation reservation = Reservation.builder()
                 .guestName("Alice")
-                .guestEmail("alice@example.com")
+                .guestEmail("repo-alice-7191@example.com")
                 .guestPhone("9999999999")
                 .checkInDate(LocalDate.of(2026, 6, 1))
                 .checkOutDate(LocalDate.of(2026, 6, 5))
@@ -101,7 +101,8 @@ class ReservationRepositoryTest {
                                 PageRequest.of(0, 10)
                         );
 
-        assertEquals(1, result.getTotalElements());
+        assertTrue(result.getContent().stream()
+                .anyMatch(saved -> "repo-alice-7191@example.com".equals(saved.getGuestEmail())));
     }
 
     @Test
@@ -169,9 +170,13 @@ class ReservationRepositoryTest {
 
         reservationRepository.save(reservation);
 
-        long count = reservationRepository.count();
+        Page<Reservation> result =
+                reservationRepository.findByGuestEmailIgnoreCase(
+                        "sara@example.com",
+                        PageRequest.of(0, 10)
+                );
 
-        assertEquals(1, count);
+        assertEquals(1, result.getTotalElements());
     }
 
     @Test

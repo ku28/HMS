@@ -91,6 +91,7 @@
 
 **Must NOT modify:** `hotel/`, `room/`, `payment/`, `review/`, `auth/`, `security/`, `admin/`, `config/`
 
+
 > **Coordination:** Members 4 and 5 share the `reservation/` module. Member 4 owns create/booking flow; Member 5 owns read/update/delete. Coordinate through PR reviews.
 
 ---

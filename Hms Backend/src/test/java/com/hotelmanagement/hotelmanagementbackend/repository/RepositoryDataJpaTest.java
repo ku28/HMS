@@ -23,7 +23,7 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 @ContextConfiguration(initializers = DotenvTestPropertyInitializer.class)
 @TestPropertySource(properties = {
         "spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.hibernate.ddl-auto=update",
         "spring.jpa.show-sql=false"
 })
 public @interface RepositoryDataJpaTest {

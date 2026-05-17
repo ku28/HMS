@@ -19,25 +19,24 @@ class HotelRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        hotelRepository.deleteAll();
         hotelRepository.save(Hotel.builder()
-                .name("Oberoi")
-                .location("Delhi")
+                .name("Repo Oberoi 7191")
+                .location("Repo Delhi 7191")
                 .description("Luxury hotel")
                 .build());
         hotelRepository.save(Hotel.builder()
-                .name("Taj Palace")
-                .location("Delhi")
+                .name("Repo Taj Palace 7191")
+                .location("Repo Delhi 7191")
                 .description("Premium hotel")
                 .build());
         hotelRepository.save(Hotel.builder()
-                .name("Radisson Blu")
-                .location("Mumbai")
+                .name("Repo Radisson Blu 7191")
+                .location("Repo Mumbai 7191")
                 .description("Business hotel")
                 .build());
         hotelRepository.save(Hotel.builder()
-                .name("Hayat Regency")
-                .location("Chandigarh")
+                .name("Repo Hayat Regency 7191")
+                .location("Repo Chandigarh 7191")
                 .description("City hotel")
                 .build());
     }
@@ -48,7 +47,7 @@ class HotelRepositoryTest {
 
         Page<Hotel> result =
                 hotelRepository.findByLocationContainingIgnoreCase(
-                        "Delhi",
+                        "Repo Delhi 7191",
                         PageRequest.of(0, 10)
                 );
 
@@ -71,8 +70,8 @@ class HotelRepositoryTest {
 
         Hotel hotel = result.getContent().getFirst();
 
-        assertEquals("Radisson Blu", hotel.getName());
-        assertEquals("Mumbai", hotel.getLocation());
+        assertEquals("Repo Radisson Blu 7191", hotel.getName());
+        assertEquals("Repo Mumbai 7191", hotel.getLocation());
     }
 
     @Test
@@ -83,7 +82,7 @@ class HotelRepositoryTest {
                 hotelRepository
                         .findByNameContainingIgnoreCaseOrLocationContainingIgnoreCase(
                                 "Hayat",
-                                "Chandigarh",
+                                "Repo Chandigarh 7191",
                                 PageRequest.of(0, 10)
                         );
 
@@ -92,8 +91,8 @@ class HotelRepositoryTest {
 
         Hotel hotel = result.getContent().getFirst();
 
-        assertEquals("Hayat Regency", hotel.getName());
-        assertEquals("Chandigarh", hotel.getLocation());
+        assertEquals("Repo Hayat Regency 7191", hotel.getName());
+        assertEquals("Repo Chandigarh 7191", hotel.getLocation());
     }
 
     @Test
@@ -102,8 +101,8 @@ class HotelRepositoryTest {
 
         boolean exists =
                 hotelRepository.existsByNameAndLocation(
-                        "Oberoi",
-                        "Delhi"
+                        "Repo Oberoi 7191",
+                        "Repo Delhi 7191"
                 );
 
         assertTrue(exists);

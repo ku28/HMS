@@ -88,7 +88,7 @@ class ReservationServiceImplTest {
                 .checkInDate(LocalDate.now().plusDays(10)).checkOutDate(LocalDate.now().plusDays(5)).build();
         assertThatThrownBy(() -> reservationService.createReservation(bad))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("Check-in date must be before check-out date");
+                .hasMessageContaining("Check-out date must be after check-in date");
         verify(reservationRepository, never()).save(any());
     }
 

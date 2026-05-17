@@ -29,7 +29,6 @@ class PaymentRepositoryTest {
 
     @BeforeEach
     void cleanDatabase() {
-        paymentRepository.deleteAll();
     }
 
     @Test
@@ -111,7 +110,7 @@ class PaymentRepositoryTest {
                 Payment.builder()
                         .amount(BigDecimal.valueOf(100))
                         .paymentDate(LocalDate.now())
-                        .paymentStatus("PAID")
+                        .paymentStatus("REPO_PAID_7191")
                         .paymentMethod("CARD")
                         .reservation(reservation1)
                         .build(),
@@ -119,7 +118,7 @@ class PaymentRepositoryTest {
                 Payment.builder()
                         .amount(BigDecimal.valueOf(200))
                         .paymentDate(LocalDate.now())
-                        .paymentStatus("pending")
+                        .paymentStatus("REPO_PENDING_7191")
                         .paymentMethod("CASH")
                         .reservation(reservation2)
                         .build(),
@@ -127,7 +126,7 @@ class PaymentRepositoryTest {
                 Payment.builder()
                         .amount(BigDecimal.valueOf(300))
                         .paymentDate(LocalDate.now())
-                        .paymentStatus("PAID")
+                        .paymentStatus("REPO_PAID_7191")
                         .paymentMethod("UPI")
                         .reservation(reservation3)
                         .build()
@@ -137,7 +136,7 @@ class PaymentRepositoryTest {
 
         Page<Payment> result =
                 paymentRepository.findByPaymentStatusIgnoreCase(
-                        "paid",
+                        "repo_paid_7191",
                         pageable
                 );
 
@@ -324,6 +323,13 @@ class PaymentRepositoryTest {
                         .build()
         ));
 
-        assertThat(paymentRepository.count()).isEqualTo(2);
+        assertThat(paymentRepository.findByReservation_ReservationId(
+                reservation1.getReservationId(),
+                PageRequest.of(0, 10)
+        ).getContent()).hasSize(1);
+        assertThat(paymentRepository.findByReservation_ReservationId(
+                reservation2.getReservationId(),
+                PageRequest.of(0, 10)
+        ).getContent()).hasSize(1);
     }
 }

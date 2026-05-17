@@ -54,19 +54,47 @@ public class DotenvTestPropertyInitializer
     }
 
     private void putDatasourceProperties(Map<String, Object> properties) {
-        String url = firstValue(properties, "TEST_DB_URL", "DB_URL");
+        String url = firstValue(properties, "TEST_DB_URL");
+        if (url == null) {
+            url = composeMysqlUrl(properties);
+        }
+        if (url == null) {
+            url = firstValue(properties, "DB_URL");
+        }
         if (url != null) {
             properties.put("spring.datasource.url", mysqlTestUrl(url));
         }
 
-        String username = firstValue(properties, "TEST_DB_USERNAME", "DB_USERNAME");
-        String password = firstValue(properties, "TEST_DB_PASSWORD", "DB_PASSWORD");
+        String username = firstValue(properties, "TEST_DB_USERNAME");
+        String password = firstValue(properties, "TEST_DB_PASSWORD");
+        if (username == null && firstValue(properties, "MYSQL_ROOT_PASSWORD") != null) {
+            username = "root";
+            password = firstValue(properties, "MYSQL_ROOT_PASSWORD");
+        }
+        if (username == null) {
+            username = firstValue(properties, "MYSQL_USER", "DB_USERNAME");
+        }
+        if (password == null) {
+            password = firstValue(properties, "MYSQL_PASSWORD", "DB_PASSWORD");
+        }
         if (username != null) {
             properties.put("spring.datasource.username", username);
         }
         if (password != null) {
             properties.put("spring.datasource.password", password);
         }
+    }
+
+    private String composeMysqlUrl(Map<String, Object> properties) {
+        String database = firstValue(properties, "TEST_DB_NAME");
+        if (database == null) {
+            database = firstValue(properties, "MYSQL_DATABASE");
+        }
+        String port = firstValue(properties, "MYSQL_PORT");
+        if (database == null || port == null) {
+            return null;
+        }
+        return "jdbc:mysql://localhost:" + port + "/" + database;
     }
 
     private String firstValue(Map<String, Object> properties, String... keys) {

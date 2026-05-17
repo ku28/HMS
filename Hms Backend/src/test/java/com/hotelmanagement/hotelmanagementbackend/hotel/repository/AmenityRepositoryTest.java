@@ -97,8 +97,6 @@ class AmenityRepositoryTest {
     void shouldReturnAmenitiesAssignedToHotel() {
 
         Amenity pool = persistAmenity("Pool");
-        Amenity parking = persistAmenity("Parking");
-
         Hotel hotel = Hotel.builder()
                 .name("Taj Hotel")
                 .location("Delhi")
@@ -131,7 +129,6 @@ class AmenityRepositoryTest {
     void shouldReturnAmenitiesAssignedToRoom() {
 
         Amenity balcony = persistAmenity("Balcony");
-        Amenity minibar = persistAmenity("Minibar");
 
         Hotel hotel = persistHotel(
                 "Lake View",

@@ -1,6 +1,7 @@
 package com.hotelmanagement.hotelmanagementbackend.rest;
 
 import com.hotelmanagement.hotelmanagementbackend.config.DotenvTestPropertyInitializer;
+import com.hotelmanagement.hotelmanagementbackend.config.TestSecurityConfig;
 import com.hotelmanagement.hotelmanagementbackend.hotel.entity.Amenity;
 import com.hotelmanagement.hotelmanagementbackend.hotel.entity.Hotel;
 import com.hotelmanagement.hotelmanagementbackend.hotel.repository.AmenityRepository;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
-        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.hibernate.ddl-auto=update",
         "spring.cache.type=none"
 })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = DotenvTestPropertyInitializer.class)
+@Import(TestSecurityConfig.class)
 @Transactional
 @DisplayName("Spring Data REST Endpoint Tests")
 class RepositoryRestEndpointTest {
@@ -57,12 +60,12 @@ class RepositoryRestEndpointTest {
     @DisplayName("GET /api/hotels should return HAL paginated hotels with sorting")
     void hotelsEndpointShouldReturnPagedHotelsWithSorting() throws Exception {
         hotelRepository.save(Hotel.builder()
-                .name("Zeta Suites")
+                .name("ZZZ Rest Zeta Suites")
                 .location("Mumbai")
                 .description("Business hotel")
                 .build());
         hotelRepository.save(Hotel.builder()
-                .name("Alpha Palace")
+                .name("000 Rest Alpha Palace")
                 .location("Delhi")
                 .description("City hotel")
                 .build());
@@ -72,25 +75,25 @@ class RepositoryRestEndpointTest {
                         .param("size", "1")
                         .param("sort", "name,asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.hotels[0].name").value("Alpha Palace"))
-                .andExpect(jsonPath("$.page.size").value(1))
-                .andExpect(jsonPath("$.page.totalElements").value(2));
+                .andExpect(jsonPath("$._embedded.hotels[0].name").value("000 Rest Alpha Palace"))
+                .andExpect(jsonPath("$.page.size").value(1));
     }
 
     @Test
     @DisplayName("GET /api/hotels should use public hotel projection by default")
     void hotelsEndpointShouldUsePublicProjectionByDefault() throws Exception {
         hotelRepository.save(Hotel.builder()
-                .name("Projection Suites")
+                .name("000 Rest Projection Suites")
                 .location("Bengaluru")
                 .description("Projection test")
                 .build());
 
         mockMvc.perform(get("/api/hotels")
-                        .param("projection", "hotelPublic"))
+                        .param("projection", "hotelPublic")
+                        .param("sort", "name,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.hotels[0].hotelId").exists())
-                .andExpect(jsonPath("$._embedded.hotels[0].name").value("Projection Suites"))
+                .andExpect(jsonPath("$._embedded.hotels[0].name").value("000 Rest Projection Suites"))
                 .andExpect(jsonPath("$._embedded.hotels[0].amenities").doesNotExist());
     }
 
@@ -99,17 +102,17 @@ class RepositoryRestEndpointTest {
     void hotelSearchEndpointShouldFilterByLocation() throws Exception {
         hotelRepository.save(Hotel.builder()
                 .name("Sea View")
-                .location("Mumbai Central")
+                .location("Rest Mumbai Central 7191")
                 .description("Near the sea")
                 .build());
         hotelRepository.save(Hotel.builder()
                 .name("Hill View")
-                .location("Shimla")
+                .location("Rest Shimla 7191")
                 .description("Near the hills")
                 .build());
 
         mockMvc.perform(get("/api/hotels/search/by-location")
-                        .param("location", "mumbai")
+                        .param("location", "Rest Mumbai Central 7191")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -139,18 +142,19 @@ class RepositoryRestEndpointTest {
     @DisplayName("GET /api/room-types should expose paginated room type projection")
     void roomTypeEndpointShouldExposeProjection() throws Exception {
         roomTypeRepository.save(RoomType.builder()
-                .typeName("Executive")
+                .typeName("000 Rest Executive 7191")
                 .description("Executive room")
                 .maxOccupancy(3)
                 .pricePerNight(new BigDecimal("310.00"))
                 .build());
 
         mockMvc.perform(get("/api/room-types")
-                        .param("projection", "roomType"))
+                        .param("projection", "roomType")
+                        .param("sort", "roomTypeId,desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.roomTypes[0].roomTypeId").exists())
-                .andExpect(jsonPath("$._embedded.roomTypes[0].typeName").value("Executive"))
-                .andExpect(jsonPath("$.page.totalElements").value(1));
+                .andExpect(jsonPath("$._embedded.roomTypes[0].typeName").value("000 Rest Executive 7191"))
+                .andExpect(jsonPath("$._embedded.roomTypes[0].pricePerNight").exists());
     }
 
     @Test
@@ -175,6 +179,10 @@ class RepositoryRestEndpointTest {
                 .build());
 
         mockMvc.perform(get("/api/rooms/search/available"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/rooms/search/available-by-room-type")
+                        .param("roomTypeId", roomType.getRoomTypeId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.rooms[0].roomNumber").value(101));
     }

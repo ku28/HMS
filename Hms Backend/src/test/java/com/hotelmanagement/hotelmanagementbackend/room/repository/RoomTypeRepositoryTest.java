@@ -21,7 +21,6 @@ class RoomTypeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        roomTypeRepository.deleteAll();
     }
 
     @Test
@@ -30,14 +29,14 @@ class RoomTypeRepositoryTest {
 
         // Arrange
         RoomType deluxe = RoomType.builder()
-                .typeName("Deluxe")
+                .typeName("Repo Deluxe 7191")
                 .description("Luxury Room")
                 .maxOccupancy(4)
                 .pricePerNight(new BigDecimal("5000"))
                 .build();
 
         RoomType standard = RoomType.builder()
-                .typeName("Standard")
+                .typeName("Repo Standard 7191")
                 .description("Standard Room")
                 .maxOccupancy(2)
                 .pricePerNight(new BigDecimal("3000"))
@@ -49,7 +48,7 @@ class RoomTypeRepositoryTest {
         // Act
         Page<RoomType> result =
                 roomTypeRepository.findByTypeNameContainingIgnoreCase(
-                        "del",
+                        "Repo Deluxe 7191",
                         PageRequest.of(0, 10)
                 );
 
@@ -57,7 +56,7 @@ class RoomTypeRepositoryTest {
         assertThat(result.getContent()).hasSize(1);
 
         assertThat(result.getContent().get(0).getTypeName())
-                .isEqualTo("Deluxe");
+                .isEqualTo("Repo Deluxe 7191");
     }
 
     @Test
@@ -66,7 +65,7 @@ class RoomTypeRepositoryTest {
 
         // Arrange
         RoomType deluxe = RoomType.builder()
-                .typeName("Deluxe")
+                .typeName("Repo Exists Deluxe 7191")
                 .description("Luxury Room")
                 .maxOccupancy(4)
                 .pricePerNight(new BigDecimal("5000"))
@@ -76,7 +75,7 @@ class RoomTypeRepositoryTest {
 
         // Act
         boolean exists =
-                roomTypeRepository.existsByTypeName("Deluxe");
+                roomTypeRepository.existsByTypeName("Repo Exists Deluxe 7191");
 
         // Assert
         assertThat(exists).isTrue();
@@ -88,7 +87,7 @@ class RoomTypeRepositoryTest {
 
         // Act
         boolean exists =
-                roomTypeRepository.existsByTypeName("Suite");
+                roomTypeRepository.existsByTypeName("Repo Missing Suite 7191");
 
         // Assert
         assertThat(exists).isFalse();

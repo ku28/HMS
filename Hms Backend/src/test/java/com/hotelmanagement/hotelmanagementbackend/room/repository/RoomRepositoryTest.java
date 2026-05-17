@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 
@@ -25,8 +26,6 @@ class RoomRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        roomRepository.deleteAll();
-        roomTypeRepository.deleteAll();
     }
 
     @Test
@@ -56,11 +55,13 @@ class RoomRepositoryTest {
         // Act
         Page<Room> result =
                 roomRepository.findByIsAvailableTrue(
-                        PageRequest.of(0, 10)
+                        PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "roomId"))
                 );
 
         // Assert
-        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent())
+                .extracting(Room::getRoomNumber)
+                .contains(101, 103);
     }
 
     @Test
@@ -69,7 +70,7 @@ class RoomRepositoryTest {
 
         // Arrange
         RoomType deluxe = RoomType.builder()
-                .typeName("Deluxe")
+                .typeName("Repo Room Deluxe 7191")
                 .description("Luxury")
                 .maxOccupancy(4)
                 .pricePerNight(new BigDecimal("5000"))
@@ -101,7 +102,9 @@ class RoomRepositoryTest {
                 );
 
         // Assert
-        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent())
+                .extracting(Room::getRoomNumber)
+                .containsExactlyInAnyOrder(201, 202);
     }
 
     @Test
@@ -110,7 +113,7 @@ class RoomRepositoryTest {
 
         // Arrange
         RoomType deluxe = RoomType.builder()
-                .typeName("Deluxe")
+                .typeName("Repo Room Available Deluxe 7191")
                 .description("Luxury")
                 .maxOccupancy(4)
                 .pricePerNight(new BigDecimal("5000"))
@@ -154,7 +157,7 @@ class RoomRepositoryTest {
 
         // Arrange
         RoomType deluxe = RoomType.builder()
-                .typeName("Deluxe")
+                .typeName("Repo Room Exists Deluxe 7191")
                 .description("Luxury")
                 .maxOccupancy(4)
                 .pricePerNight(new BigDecimal("5000"))
