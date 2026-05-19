@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS Reservation (
     check_in_date DATE,
     check_out_date DATE,
     room_id INT,
+    deleted BOOLEAN DEFAULT false,
     FOREIGN KEY (room_id) REFERENCES Room(room_id)
     -- Add other fields as needed
 );
@@ -95,6 +96,7 @@ CREATE TABLE IF NOT EXISTS Review (
     rating INT,
     comment TEXT,
     review_date DATE,
+    deleted BOOLEAN DEFAULT false,
     FOREIGN KEY (reservation_id) REFERENCES Reservation(reservation_id)
     -- Add other fields as needed
 );

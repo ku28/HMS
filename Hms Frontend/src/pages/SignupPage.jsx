@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/hotelApi';
 import useAuthStore from '../store/authStore';
@@ -7,8 +7,12 @@ export default function SignupPage() {
   const [form, setForm] = useState({ fullName: '', email: '', password: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthStore();
+  const { login, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/hotels', { replace: true });
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(''); setLoading(true);

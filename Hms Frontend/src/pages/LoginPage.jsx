@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/hotelApi';
 import useAuthStore from '../store/authStore';
@@ -7,12 +7,18 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthStore();
+  const { login, isAuthenticated, isAdmin } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Get the redirect path from location state (set by BookingPage or other protected pages)
   const redirectTo = location.state?.from || null;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(redirectTo || (isAdmin() ? '/admin' : '/hotels'), { replace: true });
+    }
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

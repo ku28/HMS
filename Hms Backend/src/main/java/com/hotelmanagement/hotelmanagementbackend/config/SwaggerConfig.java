@@ -20,7 +20,7 @@ public class SwaggerConfig {
                         .version("1.0.0")
                         .description("Enterprise Hotel Management System REST API Documentation")
                         .contact(new Contact()
-                                .name("HMS Team")
+                                .name("Hotel Management System Team")
                                 .email("support@hms.com")))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new Components()

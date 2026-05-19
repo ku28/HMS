@@ -1,12 +1,16 @@
 package com.hotelmanagement.hotelmanagementbackend.review.controller;
 
 import com.hotelmanagement.hotelmanagementbackend.common.ApiResponse;
+import com.hotelmanagement.hotelmanagementbackend.common.PagedResponse;
 import com.hotelmanagement.hotelmanagementbackend.review.dto.ReviewRequestDto;
 import com.hotelmanagement.hotelmanagementbackend.review.dto.ReviewResponseDto;
 import com.hotelmanagement.hotelmanagementbackend.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,35 @@ public class ReviewController {
 
     public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all reviews")
+    public ResponseEntity<ApiResponse<PagedResponse<ReviewResponseDto>>> getAllReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(defaultValue = "reviewDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponse<ReviewResponseDto> response = reviewService.getAllReviews(pageable);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Reviews retrieved", response));
+    }
+
+    @GetMapping("/by-rating")
+    @Operation(summary = "Get reviews by rating")
+    public ResponseEntity<ApiResponse<PagedResponse<ReviewResponseDto>>> getByRating(
+            @RequestParam Integer rating,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(defaultValue = "reviewDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponse<ReviewResponseDto> response = reviewService.getReviewsByRating(rating, pageable);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", "Reviews retrieved", response));
     }
 
     @PostMapping

@@ -1,5 +1,6 @@
 package com.hotelmanagement.hotelmanagementbackend.mapper;
 
+import com.hotelmanagement.hotelmanagementbackend.reservation.entity.Reservation;
 import com.hotelmanagement.hotelmanagementbackend.review.dto.ReviewRequestDto;
 import com.hotelmanagement.hotelmanagementbackend.review.dto.ReviewResponseDto;
 import com.hotelmanagement.hotelmanagementbackend.review.entity.Review;
@@ -10,13 +11,23 @@ public class ReviewMapper {
 
     public ReviewResponseDto toResponseDto(Review review) {
         if (review == null) return null;
+        Reservation reservation = review.getReservation();
+        String hotelName = null;
+        String guestName = null;
+        if (reservation != null) {
+            guestName = reservation.getGuestName();
+            if (reservation.getRoom() != null && reservation.getRoom().getHotel() != null) {
+                hotelName = reservation.getRoom().getHotel().getName();
+            }
+        }
         return ReviewResponseDto.builder()
                 .reviewId(review.getReviewId())
-                .reservationId(review.getReservation() != null
-                        ? review.getReservation().getReservationId() : null)
+                .reservationId(reservation != null ? reservation.getReservationId() : null)
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .reviewDate(review.getReviewDate())
+                .hotelName(hotelName)
+                .guestName(guestName)
                 .build();
     }
 

@@ -21,6 +21,8 @@ public class ReservationMapper {
                 .roomNumber(reservation.getRoom() != null ? reservation.getRoom().getRoomNumber() : null)
                 .roomTypeName(reservation.getRoom() != null && reservation.getRoom().getRoomType() != null
                         ? reservation.getRoom().getRoomType().getTypeName() : null)
+                .hotelName(reservation.getRoom() != null && reservation.getRoom().getHotel() != null
+                        ? reservation.getRoom().getHotel().getName() : null)
                 .build();
     }
 

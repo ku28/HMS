@@ -23,4 +23,5 @@ public class ReservationResponseDto implements Serializable {
     private Integer roomId;
     private Integer roomNumber;
     private String roomTypeName;
+    private String hotelName;
 }
